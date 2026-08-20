@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBRAgest360 — Gestão 360º para empresas de construção</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F1EEE6;
+    --paper-2:#E9E4D6;
+    --line:#CFC8B4;
+    --ink:#1E221B;
+    --black:#12140F;
+    --blue:#2E4A5C;
+    --blue-soft:#5C7A8C;
+    --rust:#B5502D;
+    --rust-dark:#8E3D22;
+    --steel:#6E7268;
+    --radius:2px;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--rust);color:var(--paper);}
+
+  h1,h2,h3,.display{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    color:var(--black);
+  }
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  .grid-bg{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:56px 56px;
+    opacity:0.35;
+    pointer-events:none;
+  }
+  .corner{
+    position:absolute;width:22px;height:22px;pointer-events:none;
+    opacity:0.55;
+  }
+  .corner::before,.corner::after{content:'';position:absolute;background:var(--ink);}
+  .corner::before{width:100%;height:1px;top:50%;}
+  .corner::after{height:100%;width:1px;left:50%;}
+  .corner.tl{top:18px;left:18px;}
+  .corner.tr{top:18px;right:18px;}
+  .corner.bl{bottom:18px;left:18px;}
+  .corner.br{bottom:18px;right:18px;}
+
+  section{position:relative;}
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+  header{
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:22px 48px;
+    background:rgba(241,238,230,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:19px;color:var(--black);
+    display:flex;align-items:center;gap:9px;
+  }
+  .logo .dot{width:8px;height:8px;background:var(--rust);border-radius:1px;transform:rotate(45deg);}
+  nav ul{display:flex;gap:34px;}
+  nav a{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;letter-spacing:0.05em;text-transform:uppercase;
+    color:var(--steel);
+    position:relative;padding-bottom:3px;
+    transition:color .25s ease;
+  }
+  nav a::after{
+    content:'';position:absolute;left:0;bottom:0;width:0;height:1px;
+    background:var(--rust);transition:width .25s ease;
+  }
+  nav a:hover{color:var(--ink);}
+  nav a:hover::after{width:100%;}
+  .nav-cta{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;letter-spacing:0.05em;text-transform:uppercase;
+    border:1px solid var(--ink);padding:10px 20px;color:var(--ink);
+    transition:background .25s ease, color .25s ease;
+    white-space:nowrap;
+  }
+  .nav-cta:hover{background:var(--ink);color:var(--paper);}
+  .burger{display:none;}
+  .hero{
+    min-height:100svh;
+    display:flex;align-items:center;
+    padding:120px 48px 60px;
+    overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-inner{
+    display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;
+    max-width:1280px;margin:0 auto;width:100%;align-items:center;
+    position:relative;z-index:2;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+    color:var(--rust);letter-spacing:0.1em;text-transform:uppercase;
+    display:flex;align-items:center;gap:10px;margin-bottom:22px;
+  }
+  .eyebrow::before{content:'';width:26px;height:1px;background:var(--rust);}
+  .hero h1{
+    font-size:clamp(38px,5vw,60px);
+    line-height:1.06;
+    margin-bottom:26px;
+  }
+  .hero h1 em{
+    font-style:normal;color:var(--blue);
+  }
+  .hero p.lead{
+    font-size:17px;line-height:1.65;color:var(--steel);
+    max-width:460px;margin-bottom:36px;
+  }
+  .cta-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap;}
+  .btn-primary{
+    font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;
+    background:var(--rust);color:var(--paper);
+    padding:16px 30px;border:1px solid var(--rust);
+    display:inline-flex;align-items:center;gap:10px;
+    transition:background .25s ease, color .25s ease, transform .2s ease;
+  }
+  .btn-primary:hover{background:var(--rust-dark);border-color:var(--rust-dark);transform:translateY(-2px);}
+  .btn-primary svg{width:14px;height:14px;transition:transform .25s ease;}
+  .btn-primary:hover svg{transform:translateX(4px);}
+  .hint{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--steel);}
+  .hero-art{
+    position:relative;aspect-ratio:1/1;max-height:520px;
+  }
+  .hero-art svg{width:100%;height:100%;}
+  .draw-line{
+    fill:none;stroke:var(--ink);stroke-width:1.4;
+    stroke-dasharray:2000;stroke-dashoffset:2000;
+    animation:draw 2.6s cubic-bezier(.65,0,.35,1) forwards;
+  }
+  .draw-line.blue{stroke:var(--blue);}
+  .draw-line.rust{stroke:var(--rust);}
+  .draw-fill{
+    opacity:0; animation:fadein 1s ease forwards;
+    animation-delay:2.2s;
+  }
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  @keyframes fadein{to{opacity:1;}}
+  .coord{
+    position:absolute;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel);
+    opacity:0;transition:opacity .15s ease;pointer-events:none;
+  }
+  .section{padding:120px 48px;border-bottom:1px solid var(--line);}
+  .section-inner{max-width:1200px;margin:0 auto;}
+  .section-head{
+    display:grid;grid-template-columns:0.9fr 1.6fr;gap:40px;
+    margin-bottom:64px;align-items:end;
+  }
+  .sheet-num{
+    font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--steel);
+    display:block;margin-bottom:14px;
+  }
+  .section-head h2{font-size:clamp(28px,3.4vw,42px);line-height:1.1;}
+  .section-head .desc{color:var(--steel);font-size:16px;line-height:1.7;max-width:460px;}
+
+  .about-layout{
+    display:grid;grid-template-columns:0.85fr 1.5fr;gap:44px;align-items:center;
+  }
+  .about-art{width:100%;}
+  .about-art svg{width:100%;height:auto;max-height:400px;}
+  .about-art .ln{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round;}
+  .about-art .ln.thin{stroke-width:1;}
+  .about-art .ln.rust{stroke:var(--rust);}
+  .about-art .ln.steel{stroke:var(--steel);}
+  .about-art .fill-blue{fill:var(--blue);opacity:0.16;stroke:var(--blue);}
+  .about-art .dot-rust{fill:var(--rust);}
+
+  .about-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);
+    border-top:1px solid var(--line);border-left:1px solid var(--line);
+  }
+  .about-cell{
+    border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+    padding:38px 36px;
+    transition:background .3s ease;
+    position:relative;
+  }
+  .about-cell:hover{background:var(--paper-2);}
+  .about-cell .mono{font-size:11.5px;color:var(--rust);display:block;margin-bottom:14px;}
+  .about-cell h3{font-size:20px;margin-bottom:12px;}
+  .about-cell p{color:var(--steel);font-size:15px;line-height:1.7;}
+
+  .sol-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border:1px solid var(--line);
+  }
+  .sol-card{
+    background:var(--paper);padding:38px 32px;
+    transition:background .3s ease;
+    position:relative;overflow:hidden;
+  }
+  .sol-card:hover{background:var(--paper-2);}
+  .sol-icon{width:34px;height:34px;margin-bottom:24px;color:var(--blue);}
+  .sol-icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.3;}
+  .sol-card h3{font-size:18px;margin-bottom:10px;}
+  .sol-card p{font-size:14.5px;color:var(--steel);line-height:1.6;}
+  .dim-line{
+    position:absolute;left:32px;right:32px;bottom:22px;height:1px;
+    background:var(--line);
+    transform:scaleX(0);transform-origin:left;
+    transition:transform .4s ease, background .4s ease;
+  }
+  .sol-card:hover .dim-line{transform:scaleX(1);background:var(--rust);}
+
+  .steps{
+    display:grid;grid-template-columns:repeat(4,1fr);
+    position:relative;
+  }
+  .steps::before{
+    content:'';position:absolute;top:19px;left:0;right:0;height:1px;
+    background:repeating-linear-gradient(90deg, var(--steel) 0 6px, transparent 6px 12px);
+    opacity:0.5;
+  }
+  .step{padding-right:24px;position:relative;}
+  .step-num{
+    width:38px;height:38px;border:1px solid var(--ink);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;
+    background:var(--paper);position:relative;z-index:2;margin-bottom:26px;
+  }
+  .step h3{font-size:17px;margin-bottom:10px;}
+  .step p{font-size:14px;color:var(--steel);line-height:1.65;}
+  .skyline{width:100%;margin-bottom:56px;}
+  .skyline svg{width:100%;height:auto;max-height:130px;display:block;}
+  .skyline .sk-ln{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linejoin:round;}
+  .skyline .sk-ln.thin{stroke-width:0.9;}
+  .skyline .sk-ln.rust{stroke:var(--rust);}
+  .skyline .sk-ln.steel{stroke:var(--steel);}
+  .skyline .sk-ground{stroke:var(--line);stroke-width:1;fill:none;}
+  .skyline .sk-dot{fill:var(--rust);}
+
+  .who-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:22px;}
+  .who-card{
+    border:1px solid var(--line);padding:32px 24px;
+    transition:border-color .3s ease, transform .3s ease;
+  }
+  .who-card:hover{border-color:var(--blue);transform:translateY(-4px);}
+  .who-icon{width:30px;height:30px;margin-bottom:20px;color:var(--rust);}
+  .who-icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.3;}
+  .who-card h4{font-size:16px;font-weight:600;color:var(--black);font-family:'Space Grotesk',sans-serif;}
+
+  .contact-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:60px;
+  }
+  .contact-info h2{font-size:clamp(26px,3vw,36px);margin-bottom:20px;line-height:1.15;}
+  .contact-info p{color:var(--steel);font-size:15.5px;line-height:1.7;margin-bottom:32px;max-width:400px;}
+  .contact-info ul li{
+    display:flex;gap:12px;align-items:baseline;
+    font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--steel);
+    padding:10px 0;border-top:1px solid var(--line);
+  }
+  .contact-info ul li:last-child{border-bottom:1px solid var(--line);}
+  .contact-info ul li span.tag{color:var(--rust);}
+
+  form{border:1px solid var(--line);padding:36px;background:var(--paper-2);}
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    text-transform:uppercase;letter-spacing:0.06em;color:var(--steel);margin-bottom:8px;
+  }
+  .field input, .field textarea{
+    width:100%;border:none;border-bottom:1px solid var(--line);
+    background:transparent;padding:10px 2px;
+    font-family:'IBM Plex Sans',sans-serif;font-size:15px;color:var(--ink);
+    transition:border-color .25s ease;
+  }
+  .field input:focus, .field textarea:focus{
+    outline:none;border-bottom-color:var(--rust);
+  }
+  .field textarea{resize:vertical;min-height:80px;}
+  .submit-btn{
+    width:100%;margin-top:8px;
+    font-family:'IBM Plex Mono',monospace;font-size:13px;letter-spacing:0.05em;text-transform:uppercase;
+    background:var(--ink);color:var(--paper);padding:16px;border:1px solid var(--ink);
+    cursor:pointer;transition:background .25s ease;
+  }
+  .submit-btn:hover{background:var(--rust);border-color:var(--rust);}
+  .form-note{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--steel);margin-top:14px;text-align:center;}
+
+  footer{
+    padding:40px 48px;display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:16px;
+  }
+  footer .mono{font-size:11px;color:var(--steel);}
+  @media (max-width:980px){
+    header{padding:18px 24px;}
+    nav{display:none;}
+    .hero{padding:110px 24px 50px;}
+    .hero-inner{grid-template-columns:1fr;gap:50px;}
+    .hero-art{max-height:360px;order:-1;}
+    .section{padding:80px 24px;}
+    .section-head{grid-template-columns:1fr;gap:16px;}
+    .about-layout{grid-template-columns:1fr;}
+    .about-art{max-width:320px;margin:0 auto;}
+    .about-grid{grid-template-columns:1fr;}
+    .sol-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;gap:36px;}
+    .steps::before{display:none;}
+    .who-grid{grid-template-columns:repeat(3,1fr);}
+    .contact-grid{grid-template-columns:1fr;gap:40px;}
+    footer{flex-direction:column;align-items:flex-start;}
+  }
+  @media (max-width:640px){
+    .who-grid{grid-template-columns:repeat(2,1fr);}
+    .cta-row{flex-direction:column;align-items:flex-start;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .draw-line{animation:none;stroke-dashoffset:0;}
+    .draw-fill{animation:none;opacity:1;}
+    .reveal{transition:none;opacity:1;transform:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span class="dot"></span>OBRAgest360</div>
+  <nav>
+    <ul>
+      <li><a href="#inicio">Início</a></li>
+      <li><a href="#quem-somos">Quem Somos</a></li>
+      <li><a href="#solucoes">Soluções</a></li>
+      <li><a href="#como-funciona">Como Funciona</a></li>
+      <li><a href="#para-quem">Para Quem</a></li>
+    </ul>
+  </nav>
+  <a href="#contacto" class="nav-cta">Solicitar acesso</a>
+</header>
+
+<section class="hero" id="inicio">
+  <div class="grid-bg"></div>
+  <span class="corner tl"></span><span class="corner tr"></span>
+  <span class="corner bl"></span><span class="corner br"></span>
+
+  <div class="hero-inner">
+    <div>
+      <div class="eyebrow">Gestão para quem constrói</div>
+      <h1>A sua obra, <em>sob controlo</em> total.</h1>
+      <p class="lead">OBRAgest360 organiza a operação, as finanças e os projetos de uma obra num único lugar — quer seja uma empresa de construção, quer seja a casa que está a construir para si. Cada decisão apoiada em informação real, não em suposições.</p>
+      <div class="cta-row">
+        <a href="#contacto" class="btn-primary">
+          Solicitar acesso
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </a>
+        <span class="hint">Acesso por convite — empresas e donos de obra</span>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        
+        <path class="draw-line" style="animation-delay:0s" d="M40 340 H360" />
+       
+        <path class="draw-line" style="animation-delay:.15s" d="M100 340 V140 H240 V340" />
+        
+        <path class="draw-line blue" style="animation-delay:.6s" d="M100 140 L170 90 L240 140" />
+       
+        <path class="draw-line" style="animation-delay:.9s" d="M240 340 V200 H310 V340" />
+        
+        <g class="draw-line" style="animation-delay:1.2s">
+          <path d="M124 170 H160 V210 H124 Z" />
+          <path d="M180 170 H216 V210 H180 Z" />
+          <path d="M124 230 H160 V270 H124 Z" />
+          <path d="M180 230 H216 V270 H180 Z" />
+        </g>
+        
+        <g class="draw-line" style="animation-delay:1.5s">
+          <path d="M258 220 H292 V250 H258 Z" />
+          <path d="M258 270 H292 V300 H258 Z" />
+        </g>
+        
+        <path class="draw-line rust" style="animation-delay:1.8s" d="M155 340 V300 H185 V340" />
+        
+        <g class="draw-fill">
+          <path d="M40 355 V365 M360 355 V365 M40 360 H360" stroke="var(--steel)" stroke-width="1"/>
+          <text x="185" y="380" class="mono" font-size="10" fill="var(--steel)">PLANTA — OBRAGEST360</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="quem-somos">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="sheet-num">FOLHA 02 / 06</span>
+        <h2>Quem somos</h2>
+      </div>
+      <p class="desc">Nascemos da experiência de quem já geriu obras com folhas de cálculo dispersas, informação fragmentada e decisões tomadas tarde demais. OBRAgest360 existe para mudar isso.</p>
+    </div>
+
+    <div class="about-layout reveal">
+      <div class="about-art">
+        <svg viewBox="0 0 320 360" xmlns="http://www.w3.org/2000/svg">
+         
+          <path class="ln" d="M20 300 L160 340 L300 300" />
+          
+          <path class="ln" d="M90 300 L90 200 L160 175 L160 275 Z" />
+          <path class="ln" d="M160 275 L160 175 L230 200 L230 300 Z" />
+          <path class="ln fill-blue" d="M90 200 L160 175 L230 200 L160 225 Z" />
+          
+          <g class="ln thin">
+            <path d="M105 220 L105 250 L128 242 L128 212 Z" />
+            <path d="M135 210 L135 240 L155 233 L155 203 Z" />
+            <path d="M105 260 L105 285 L128 278 L128 253 Z" />
+          </g>
+          <g class="ln thin">
+            <path d="M167 203 L167 233 L188 240 L188 210 Z" />
+            <path d="M195 213 L195 242 L215 249 L215 219 Z" />
+            <path d="M167 253 L167 278 L188 285 L188 260 Z" />
+          </g>
+          
+          <path class="ln rust" d="M255 300 L255 90" />
+          <path class="ln rust" d="M255 90 L60 130" />
+          <path class="ln rust" d="M255 90 L285 105" />
+          <path class="ln rust" d="M255 105 L235 120" />
+          <path class="ln rust thin" d="M100 130 L100 165" />
+          <circle class="dot-rust" cx="100" cy="167" r="3" />
+          
+          <path class="ln thin steel" d="M20 315 L20 325 M300 315 L300 325 M20 320 L300 320" />
+        </svg>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-cell">
+          <span class="mono">Propósito</span>
+          <h3>Porque existimos</h3>
+          <p>Construir, seja uma obra de grande escala ou a casa da família, continua a ser feito com ferramentas dispersas e informação fragmentada. Criámos o OBRAgest360 para trazer ordem e controlo a quem gere uma obra — seja uma empresa, seja um particular.</p>
+        </div>
+        <div class="about-cell">
+          <span class="mono">Missão</span>
+          <h3>O que fazemos</h3>
+          <p>Dar às empresas de construção o controlo total sobre a sua operação, reunindo a gestão do negócio num único ambiente claro, fiável e adaptado à realidade angolana.</p>
+        </div>
+        <div class="about-cell">
+          <span class="mono">Visão</span>
+          <h3>Para onde vamos</h3>
+          <p>Ser a referência em gestão para empresas de construção em Angola, tornando-se parte essencial de como estas empresas planeiam, operam e crescem.</p>
+        </div>
+        <div class="about-cell">
+          <span class="mono">Valores</span>
+          <h3>Como trabalhamos</h3>
+          <p>Rigor na informação, transparência na gestão, simplicidade na utilização e confiança em cada decisão apoiada pela plataforma.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="solucoes">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="sheet-num">FOLHA 03 / 06</span>
+        <h2>Soluções</h2>
+      </div>
+      <p class="desc">Uma plataforma, seis frentes de gestão. Tudo o que uma empresa de construção precisa para operar com clareza.</p>
+    </div>
+
+    <div class="sol-grid reveal">
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <h3>Gestão centralizada</h3>
+        <p>Toda a informação da empresa reunida num único lugar, acessível a quem precisa dela.</p>
+        <div class="dim-line"></div>
+      </div>
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 3"/></svg></div>
+        <h3>Controlo operacional</h3>
+        <p>Acompanhe o dia a dia da operação com visibilidade sobre o que está a acontecer.</p>
+        <div class="dim-line"></div>
+      </div>
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></div>
+        <h3>Gestão financeira</h3>
+        <p>Acompanhe a saúde financeira da empresa com clareza, sem depender de folhas soltas.</p>
+        <div class="dim-line"></div>
+      </div>
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><path d="M4 21V9l8-6 8 6v12"/><path d="M9 21v-8h6v8"/></svg></div>
+        <h3>Gestão de projetos</h3>
+        <p>Cada obra organizada do início ao fim, com o progresso sempre visível.</p>
+        <div class="dim-line"></div>
+      </div>
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><path d="M4 19V5a2 2 0 012-2h9l5 5v11a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><path d="M8 12h8M8 16h5"/></svg></div>
+        <h3>Informação e relatórios</h3>
+        <p>Dados organizados e prontos para apoiar decisões, sem esforço adicional.</p>
+        <div class="dim-line"></div>
+      </div>
+
+      <div class="sol-card">
+        <div class="sol-icon"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 10h16M10 4v16"/></svg></div>
+        <h3>Tecnologia para construção</h3>
+        <p>Uma plataforma pensada de raiz para a realidade das empresas do setor.</p>
+        <div class="dim-line"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="como-funciona">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="sheet-num">FOLHA 04 / 06</span>
+        <h2>Como funciona</h2>
+      </div>
+      <p class="desc">Do primeiro acesso à decisão informada — um percurso simples, pensado para começar rápido.</p>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Criar a conta da empresa</h3>
+        <p>Regista a sua empresa e configura o essencial para começar a operar na plataforma.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Organizar a operação</h3>
+        <p>Estrutura a informação do negócio de forma clara, pronta para ser usada no dia a dia.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Acompanhar os projetos</h3>
+        <p>Mantém visibilidade sobre cada obra em curso, sem perder o essencial no meio de detalhes.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Tomar decisões com mais informação</h3>
+        <p>Usa dados reais, e não suposições, para decidir os próximos passos da empresa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="para-quem">
+  <div class="section-inner">
+    <div class="section-head reveal">
+      <div>
+        <span class="sheet-num">FOLHA 05 / 06</span>
+        <h2>Para quem é</h2>
+      </div>
+      <p class="desc">Construído para quem gere uma obra — de uma grande empreitada à casa própria.</p>
+    </div>
+
+    <div class="skyline reveal">
+      <svg viewBox="0 0 900 140" preserveAspectRatio="xMidYMax meet" xmlns="http://www.w3.org/2000/svg">
+        <path class="sk-ground" d="M0 132 H900" />
+        
+        <path class="sk-ln" d="M60 132 V90 L110 60 L160 90 V132 Z" />
+        <path class="sk-ln thin" d="M78 132 V105 H96 V132" />
+        <path class="sk-ln thin" d="M122 100 H140 V116 H122 Z" />
+        
+        <path class="sk-ln" d="M210 132 V50 H270 V132 Z" />
+        <g class="sk-ln thin">
+          <path d="M222 65 H238 V80 H222 Z"/><path d="M244 65 H260 V80 H244 Z"/>
+          <path d="M222 90 H238 V105 H222 Z"/><path d="M244 90 H260 V105 H244 Z"/>
+        </g>
+      
+        <path class="sk-ln rust" d="M330 132 V26 H400 V132 Z" />
+        <g class="sk-ln thin">
+          <path d="M344 40 H386 V52 H344 Z"/>
+          <path d="M344 62 H386 V74 H344 Z"/>
+          <path d="M344 84 H386 V96 H344 Z"/>
+          <path d="M344 106 H386 V118 H344 Z"/>
+        </g>
+        
+        <path class="sk-ln steel thin" d="M430 132 V20 M430 20 L560 40 M430 32 L410 46" />
+        <circle class="sk-dot" cx="560" cy="42" r="2.6" />
+        
+        <path class="sk-ln" d="M600 132 V70 H660 V132 Z" />
+        <path class="sk-ln thin" d="M614 84 H646 V96 H614 Z M614 106 H646 V118 H614 Z" />
+        
+        <path class="sk-ln" d="M710 132 V96 L750 74 L790 96 V132 Z" />
+        <path class="sk-ln thin" d="M726 132 V112 H742 V132" />
+        
+        <path class="sk-ln steel thin" d="M0 132 V138 M900 132 V138" />
+      </svg>
+    </div>
+
+    <div class="who-grid reveal">
+      <div class="who-card">
+        <div class="who-icon"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
+        <h4>Empresas de construção</h4>
+      </div>
+      <div class="who-card">
+        <div class="who-icon"><svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg></div>
+        <h4>Donos de obra</h4>
+      </div>
+      <div class="who-card">
+        <div class="who-icon"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.4-3.4a4 4 0 01-5.4 5.4L6.5 21.5a2.12 2.12 0 01-3-3L13.7 8.3a4 4 0 015.4-5.4l-3.4 3.4z"/></svg></div>
+        <h4>Empreiteiros</h4>
+      </div>
+      <div class="who-card">
+        <div class="who-icon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M8 4v5"/></svg></div>
+        <h4>Gestores de projetos</h4>
+      </div>
+      <div class="who-card">
+        <div class="who-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+        <h4>Profissionais do setor</h4>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section" id="contacto">
+  <div class="section-inner">
+    <span class="sheet-num reveal">FOLHA 06 / 06</span>
+    <div class="contact-grid" style="margin-top:14px;">
+      <div class="contact-info reveal">
+        <h2>Quer ver a sua empresa a operar assim?</h2>
+        <p>Solicite acesso e a nossa equipa entra em contacto para perceber a realidade da sua empresa e ativar o OBRAgest360.</p>
+        <ul>
+          <li><span class="tag">01</span> Preenche o formulário</li>
+          <li><span class="tag">02</span> A equipa entra em contacto</li>
+          <li><span class="tag">03</span> Ativação da sua empresa</li>
+        </ul>
+      </div>
+
+      <form class="reveal" id="access-form">
+        <div class="field">
+          <label for="empresa">Nome da empresa</label>
+          <input id="empresa" type="text" required>
+        </div>
+        <div class="field">
+          <label for="responsavel">Nome do responsável</label>
+          <input id="responsavel" type="text" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" required>
+        </div>
+        <div class="field">
+          <label for="telefone">Telefone</label>
+          <input id="telefone" type="tel">
+        </div>
+        <div class="field">
+          <label for="mensagem">Mensagem</label>
+          <textarea id="mensagem" placeholder="Fale-nos um pouco sobre a sua empresa..."></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Solicitar acesso</button>
+        <p class="form-note">Ao submeter, abrimos o seu email para enviar o pedido para a nossa equipa</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="logo"><span class="dot"></span>OBRAgest360</div>
+  <span class="mono">Gestão 360º para quem constrói</span>
+  <span class="mono">© 2026 OBRAgest360 — LENUDE ACC</span>
+</footer>
+
+<script>
+ 
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, {threshold:0.15});
+  revealEls.forEach(el=>io.observe(el));
+
+
+  const DEST_EMAIL = 'grupolenudelda@gmail.com';
+  const accessForm = document.getElementById('access-form');
+  accessForm.addEventListener('submit', function(e){
+    e.preventDefault();
+
+    const empresa = document.getElementById('empresa').value.trim();
+    const responsavel = document.getElementById('responsavel').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const mensagem = document.getElementById('mensagem').value.trim();
+
+    const subject = `Pedido de acesso — ${empresa}`;
+    const body =
+`Novo pedido de acesso ao OBRAgest360
+
+Empresa: ${empresa}
+Responsável: ${responsavel}
+Email: ${email}
+Telefone: ${telefone || 'Não indicado'}
+
+Mensagem:
+${mensagem || 'Sem mensagem adicional.'}`;
+
+    const mailtoLink = `mailto:${DEST_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailtoLink;
+
+    const btn = accessForm.querySelector('.submit-btn');
+    btn.textContent = 'A abrir o seu email ✓';
+    btn.style.background = 'var(--blue)';
+    btn.style.borderColor = 'var(--blue)';
+  });
+</script>
+
+</body>
+</html>
